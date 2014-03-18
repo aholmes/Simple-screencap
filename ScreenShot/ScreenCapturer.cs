@@ -2,15 +2,17 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using ScreenShot.Utilities;
 
 namespace ScreenShot
 {
 	// http://stackoverflow.com/a/11957567/1801382
 	public enum CaptureMode
 	{
-		Screen, Window
+		Screen, Window, Desktop
 	}
 
 	public static class ScreenCapturer
@@ -32,6 +34,7 @@ namespace ScreenShot
 
 		[DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
 		public static extern IntPtr GetDesktopWindow();
+
 
 		/// <summary> Capture Active Window, Desktop, Window or Control by hWnd or .NET Contro/Form and save it to a specified file.  </summary>
 		/// <param name="filename">Filename.
@@ -70,18 +73,44 @@ namespace ScreenShot
 		}
 		/// <summary> Capture the active window (default) or the desktop and return it as a bitmap </summary>
 		/// <param name="mode">Optional. The default value is CaptureMode.Window.</param>
-		public static Bitmap Capture(CaptureMode mode = CaptureMode.Window)
-		{
-			return Capture(mode == CaptureMode.Screen ? GetDesktopWindow() : GetForegroundWindow());
+		public static Bitmap Capture(CaptureMode mode = CaptureMode.Window) 
+    {
+		  switch (mode) 
+      {
+		    case CaptureMode.Screen:
+          return Capture(GetDesktopWindow());
+        case CaptureMode.Window:
+          return Capture(GetForegroundWindow());
+        case CaptureMode.Desktop:
+          return CaptureAll();
+		  }
+		  return null;
 		}
 
-		/// <summary> Capture a .NET Control, Form, UserControl, etc. </summary>
+
+	  /// <summary> Capture a .NET Control, Form, UserControl, etc. </summary>
 		/// <param name="c">Object to capture</param>
 		/// <returns> Bitmap of control's area </returns>
 		public static Bitmap Capture(Control c)
 		{
 			return Capture(c.Handle);
 		}
+
+	  /// <summary>
+	  /// Capture entire virtual desktop
+	  /// </summary>
+	  /// <returns> Bitmap of area </returns>
+    public static Bitmap CaptureAll() 
+    {
+	    var vs = SystemInformation.VirtualScreen;
+	    var bounds = new Rectangle(vs.Left, vs.Top, vs.Right - vs.Left, vs.Bottom - vs.Top);
+	    CursorPosition = new Point(Cursor.Position.X - vs.Left, Cursor.Position.Y - vs.Top);
+
+	    var result = new Bitmap(bounds.Width, bounds.Height);
+	    using (var g = Graphics.FromImage(result))
+	      g.CopyFromScreen(new Point(bounds.Left, bounds.Top), Point.Empty, bounds.Size, CopyPixelOperation.SourceCopy);
+	    return result;
+	  }
 
 
 		/// <summary> Capture a specific window and return it as a bitmap </summary>
@@ -115,9 +144,10 @@ namespace ScreenShot
 		/// Image.</param>
 		static void ImageSave(string filename, ImageFormat format, Image image)
 		{
+
 			format = format ?? ImageFormat.Png;
 			if (!filename.Contains("."))
-				filename = filename.Trim() + "." + format.ToString().ToLower();
+        filename = filename.Trim() + format.GetImageFormatFileExtension();
 
 			if (!filename.Contains(@"\"))
 				filename = Path.Combine(Environment.GetEnvironmentVariable("TEMP") ?? @"C:\Temp", filename);
@@ -134,7 +164,7 @@ namespace ScreenShot
 			image.Save(filename, format);
 		}
 
-		private static ImageCodecInfo GetEncoder(ImageFormat format)
+    private static ImageCodecInfo GetEncoder(ImageFormat format)
 		{
 			ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
 

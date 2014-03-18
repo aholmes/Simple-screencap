@@ -1,8 +1,58 @@
 ﻿<Application x:Class="ScreenShot.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             StartupUri="MainWindow.xaml">
-    <Application.Resources>
-         
-    </Application.Resources>
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Application.Resources>
+    <Style TargetType="{x:Type TextBlock}">
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="Margin" Value="5,2"/>
+    </Style>
+    <Style TargetType="TextBox">
+      <Setter Property="VerticalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+      <Setter Property="Margin" Value="5,2"/>
+    </Style>
+    <Style TargetType="Button">
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="Margin" Value="5,2"/>
+      <Setter Property="Padding" Value="2"/>
+    </Style>
+    
+    <Style TargetType="RadioButton">
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+      <Setter Property="Margin" Value="5,2"/>
+      <Setter Property="Padding" Value="2"/>
+    </Style>
+    
+    <Style x:Key="EnumItemContainerStyle" TargetType="ListBoxItem">
+      <Setter Property="Background" Value="{x:Null}"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ListBoxItem">
+            <Border Background="Transparent">
+              <!-- If we don't have a transparent border here, hit-test visibility is poor -->
+              <ContentPresenter />
+            </Border>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+    
+    <Style x:Key="EnumSelectorListBox" TargetType="ListBox">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="ItemContainerStyle" Value="{StaticResource EnumItemContainerStyle}"/>
+    </Style>
+
+  </Application.Resources>
 </Application>
